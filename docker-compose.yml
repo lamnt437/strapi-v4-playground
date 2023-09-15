@@ -1,0 +1,35 @@
+version: "3.0"
+services:
+  api:
+    image: naskio/strapi:latest
+    env_file: &env_file
+      - ./docker/.env
+    user: "${COMPOSE_UID:-1000}:${COMPOSE_GID:-1000}"
+    volumes:
+      - ./app:/srv/app
+    ports:
+      - '1337:1337'
+    depends_on:
+      - db
+    networks: &network
+      - strapi-playground-network
+  db:
+    image: postgres:13.6
+    environment:
+      - POSTGRES_DB=strapi
+      - POSTGRES_USER=strapi
+      - POSTGRES_PASSWORD=strapi
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - TZ=Asia/Tokyo
+    volumes:
+      # REMOVE_ON_CI
+      - db-data:/var/lib/postgresql/data # REMOVE_ON_CI
+    networks: *network
+    ports:
+      - '5440:5432'
+volumes:
+  db-data:
+    driver: local
+networks:
+  strapi-playground-network:
+    name: strapi-playground-network
